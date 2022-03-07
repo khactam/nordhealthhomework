@@ -2,11 +2,20 @@ import React, { Component } from 'react';
 class Product extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            data: this.props.productData,
-            newName: this.props.productData.Name,
-            newBarCode: this.props.productData.BarCode
+        if (this.props.productData) {
+            this.state = {
+                data: this.props.productData,
+                newName: this.props.productData.Name,
+                newBarCode: this.props.productData.BarCode
+            }
         }
+        else {
+            this.state = {
+                newName: '',
+                newBarCode: ''
+            }
+        }
+        this.state.method = this.props.method;
         this.onNameChange = this.onNameChange.bind(this);
         this.onBarCodeChange = this.onBarCodeChange.bind(this);
         this.handleSubmit = this.handleSubmit.bind(this);
@@ -19,19 +28,22 @@ class Product extends Component {
     }
     handleSubmit(event) {
         const productData = {
-            Id: this.state.data.Id,
             Name: this.state.newName,
             BarCode: this.state.newBarCode
         }
+        if (this.state.method === 'update') productData.Id = this.state.data.Id
         const putMethod = {
-            method: 'PUT', // Method itself
+            method: this.state.method === 'update' ? 'PUT' : 'POST',
             headers: {
-                'Content-type': 'application/json; charset=UTF-8' // Indicates the content 
+                'Content-type': 'application/json; charset=UTF-8'
             },
-            body: JSON.stringify(productData) // We send data in JSON format
+            body: JSON.stringify(productData)
         }
+
         fetch(window.restApiUrl, putMethod).then(response => response.json())
-            .then(data => console.log(data)) // Manipulate the data retrieved back, if we want to do something with it
+            .then((data) => {
+                this.props.handleCloseModal()
+            })
             .catch(err => console.log(err))
         event.preventDefault();
     }
@@ -40,14 +52,14 @@ class Product extends Component {
             <form onSubmit={this.handleSubmit}>
                 <label>
                     Name:
-                    <input type="text" name="name" defaultValue={this.state.data.Name} onChange={this.onNameChange} />
+                    <input type="text" name="name" defaultValue={this.state.newName} onChange={this.onNameChange} />
                 </label>
                 <br />
                 <label>
                     BarCode:
-                    <input type="number" name="barcode" defaultValue={this.state.data.BarCode} onChange={this.onBarCodeChange} />
+                    <input type="number" name="barcode" defaultValue={this.state.newBarCode} onChange={this.onBarCodeChange} />
                 </label>
-                <input type="submit" value="Update" />
+                <input type="submit" value="Submit" />
             </form>
         </div>
     }

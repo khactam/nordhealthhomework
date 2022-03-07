@@ -12,7 +12,8 @@ class Products extends Component {
         super(props);
         let that = this;
         this.state = {
-            showModal: false,
+            showModalCreateProduct: false,
+            showModalModifyProduct: false,
             defaultColDef: {
                 flex: 1,
                 minWidth: 150,
@@ -32,9 +33,17 @@ class Products extends Component {
                     cellRendererParams: {
                         clicked: function (field) {
                             if (field.action === 'modify')
-                                that.handleOpenModal(field.data);
+                                that.handleOpenModalModifyProduct(field.data);
                             else {
-                                console.log('delete')
+                                const putMethod = {
+                                    method: 'DELETE',
+                                    headers: {
+                                        'Content-type': 'application/json; charset=UTF-8'
+                                    }
+                                }
+                                fetch(window.restApiUrl + '/' + field.data.Id, putMethod).then(response => response.json())
+                                    .then(data => that.retrieveProducts())
+                                    .catch(err => console.log(err))
                             }
                         }
                     }
@@ -44,14 +53,16 @@ class Products extends Component {
             },
             rowData: []
         };
-        this.handleCloseModal = this.handleCloseModal.bind(this)
+        this.handleOpenModalCreateProduct = this.handleOpenModalCreateProduct.bind(this)
+        this.handleCloseModalCreateProduct = this.handleCloseModalCreateProduct.bind(this)
+        this.handleCloseModalModifyProduct = this.handleCloseModalModifyProduct.bind(this)
     }
     componentDidMount() {
+        this.retrieveProducts()
+    }
+    retrieveProducts() {
         this.callBackendAPI()
             .then(res => this.setState({ rowData: res }))
-            .then((res) => {
-                console.log()
-            })
             .catch(err => console.log(err));
     }
     callBackendAPI = async () => {
@@ -62,14 +73,24 @@ class Products extends Component {
         }
         return body;
     }
-    handleOpenModal(product) {
+    handleOpenModalCreateProduct() {
+        this.setState({ showModalCreateProduct: true });
+    }
+    handleCloseModalCreateProduct() {
+        this.setState({ showModalCreateProduct: false });
+    }
+    handleOpenModalModifyProduct(product) {
         this.setState({
-            showModal: true,
+            showModalModifyProduct: true,
             productData: product
         });
     }
-    handleCloseModal() {
-        this.setState({ showModal: false });
+    handleCloseModalModifyProduct() {
+        this.setState({ showModalModifyProduct: false });
+    }
+    handleAfterUpdateProduct() {
+        this.retrieveProducts();
+        this.handleCloseModalModifyProduct();
     }
     render() {
         return <div className="ag-theme-alpine" style={{ height: '50vh', width: '100wv' }} defaultcoldef={{
@@ -87,16 +108,27 @@ class Products extends Component {
                 top: '15px',
                 float: 'right',
                 right: '10px'
-            }}>Add new product</button>
+            }} onClick={this.handleOpenModalCreateProduct}>Add new product</button>
             <ReactModal
-                isOpen={this.state.showModal}
-                contentLabel="Modal #1 Global Style Override Example"
-                onRequestClose={this.handleCloseModal}
+                isOpen={this.state.showModalCreateProduct}
+                contentLabel="Create product"
+                onRequestClose={this.handleCloseModalCreateProduct}
                 ariaHideApp={false}
             >
-                <Product productData={this.state.productData} />
-                <button onClick={this.handleCloseModal}>Close Modal</button>
+                <Product method="create" handleCloseModal={this.handleCloseModalCreateProduct} />
+                <button onClick={this.handleCloseModalCreateProduct}>Close Modal</button>
             </ReactModal>
+
+            <ReactModal
+                isOpen={this.state.showModalModifyProduct}
+                contentLabel="Modify product"
+                onRequestClose={this.handleCloseModalModifyProduct}
+                ariaHideApp={false}
+            >
+                <Product method="update" handleCloseModal={this.handleCloseModalModifyProduct} productData={this.state.productData} />
+                <button onClick={this.handleCloseModalModifyProduct}>Close Modal</button>
+            </ReactModal>
+
         </div>
     };
 }
