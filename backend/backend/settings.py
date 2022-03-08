@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-kk*0$4r_1b&1q+!b+g-_w+q4*ml!b^3z*gjqmf@p!n2p72z=cr
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ["*"]
 
 
 # Application definition
@@ -53,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'whitenoise.middleware.whiteNoiseMiddleware'
 ]
 
 ROOT_URLCONF = 'backend.urls'
@@ -131,3 +132,7 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+import dj_database_url
+prod_db=dj_database_url.config(conn_max_age=500)
+DATABASES['default'].update(prod_db)
