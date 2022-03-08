@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import './App.css';
 import Products from './components/products/products';
 
-window.restApiUrl = 'http://127.0.0.1:8000/store';
+window.restApiUrl = 'https://nhhomeworkapi.herokuapp.com/store';
 class App extends Component {
   render() {
     return (
