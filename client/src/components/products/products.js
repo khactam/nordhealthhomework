@@ -1,10 +1,12 @@
 import React, { Component } from 'react';
 import { AgGridReact } from 'ag-grid-react';
+import { Popover } from 'react-tiny-popover'
 import 'ag-grid-community/dist/styles/ag-grid.css';
 import 'ag-grid-community/dist/styles/ag-theme-alpine.css';
 import BtnCellRenderer from "./BtnCellRenderer.jsx";
 import ReactModal from 'react-modal';
 import Product from '../product/product'
+import Cart from '../cart/cart'
 // ReactModal.defaultStyles.overlay.backgroundColor = 'cornsilk';
 
 class Products extends Component {
@@ -14,6 +16,7 @@ class Products extends Component {
         this.state = {
             showModalCreateProduct: false,
             showModalModifyProduct: false,
+            showModalCart: false,
             defaultColDef: {
                 flex: 1,
                 minWidth: 150,
@@ -53,6 +56,8 @@ class Products extends Component {
             },
             rowData: []
         };
+        this.handleOpenModalCart = this.handleOpenModalCart.bind(this)
+        this.handleCloseModalCart = this.handleCloseModalCart.bind(this)
         this.handleOpenModalCreateProduct = this.handleOpenModalCreateProduct.bind(this)
         this.handleCloseModalCreateProduct = this.handleCloseModalCreateProduct.bind(this)
         this.handleCloseModalModifyProduct = this.handleCloseModalModifyProduct.bind(this)
@@ -88,14 +93,19 @@ class Products extends Component {
     handleCloseModalModifyProduct() {
         this.setState({ showModalModifyProduct: false });
     }
+    handleOpenModalCart() {
+        this.setState({ showModalCart: true });
+    }
+    handleCloseModalCart() {
+        this.setState({ showModalCart: false });
+    }
     handleAfterUpdateProduct() {
         this.retrieveProducts();
         this.handleCloseModalModifyProduct();
     }
     render() {
-        return <div className="ag-theme-alpine" style={{ height: '50vh', width: '100wv' }} defaultcoldef={{
-            flex: 1,
-        }}>
+        return <div className="ag-theme-alpine" style={{ height: '50vh', width: '100wv' }} defaultcoldef={{ flex: 1 }}>
+            
             <AgGridReact
                 rowData={this.state.rowData}
                 columnDefs={this.state.columnDefs}
@@ -103,15 +113,12 @@ class Products extends Component {
                 frameworkComponents={this.state.frameworkComponents}
                 suppressRowTransform={true}>
             </AgGridReact>
-            <button style={{
-                position: 'absolute',
-                top: '15px',
-                float: 'right',
-                right: '10px'
-            }} onClick={this.handleOpenModalCreateProduct}>Add new product</button>
+
+            <button style={{ position: 'absolute',top: '15px',float: 'right', right: '55px'}} onClick={this.handleOpenModalCreateProduct}>Add new product</button>
+            <button style={{ position: 'absolute',top: '15px',float: 'right', right: '10px'}} onClick={this.handleOpenModalCart}>Cart</button>
+
             <ReactModal
                 isOpen={this.state.showModalCreateProduct}
-                contentLabel="Create product"
                 onRequestClose={this.handleCloseModalCreateProduct}
                 ariaHideApp={false}
             >
@@ -121,7 +128,6 @@ class Products extends Component {
 
             <ReactModal
                 isOpen={this.state.showModalModifyProduct}
-                contentLabel="Modify product"
                 onRequestClose={this.handleCloseModalModifyProduct}
                 ariaHideApp={false}
             >
@@ -129,6 +135,14 @@ class Products extends Component {
                 <button onClick={this.handleCloseModalModifyProduct}>Close Modal</button>
             </ReactModal>
 
+            <ReactModal
+                isOpen={this.state.showModalCart}
+                onRequestClose={this.handleCloseModalCart}
+                ariaHideApp={false}
+            >
+                <Cart />
+                <button onClick={this.handleCloseModalCart}>Close cart</button>
+            </ReactModal>
         </div>
     };
 }
