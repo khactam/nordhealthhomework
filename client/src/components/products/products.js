@@ -17,6 +17,7 @@ class Products extends Component {
             showModalCreateProduct: false,
             showModalModifyProduct: false,
             showModalCart: false,
+            cartId: localStorage.getItem('CartId'),
             defaultColDef: {
                 flex: 1,
                 minWidth: 150,
@@ -37,15 +38,35 @@ class Products extends Component {
                         clicked: function (field) {
                             if (field.action === 'modify')
                                 that.handleOpenModalModifyProduct(field.data);
-                            else {
-                                const putMethod = {
+                            else if (field.action === 'delete') {
+                                const method = {
                                     method: 'DELETE',
                                     headers: {
                                         'Content-type': 'application/json; charset=UTF-8'
                                     }
                                 }
-                                fetch(window.restApiUrl + '/' + field.data.Id, putMethod).then(response => response.json())
+                                fetch(window.restApiUrl + '/' + field.data.Id, method).then(response => response.json())
                                     .then(data => that.retrieveProducts())
+                                    .catch(err => console.log(err))
+                            }
+                            else {
+                                console.log('to cart', field)
+                                let createCartItemData = {
+                                    Cart_id : localStorage.getItem('CartId'),
+                                    Product_id : field.data.Id
+                                }
+                                const that = this;
+                                const method = {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-type': 'application/json; charset=UTF-8'
+                                    },
+                                    body: JSON.stringify(createCartItemData)
+                                }
+                                fetch(window.restApiUrl + '/cartItems', method).then(response => response.json())
+                                    .then((data) => {
+                                        console.log(data)
+                                    })
                                     .catch(err => console.log(err))
                             }
                         }
@@ -64,6 +85,31 @@ class Products extends Component {
     }
     componentDidMount() {
         this.retrieveProducts()
+        let cartId = localStorage.getItem('CartId');
+        if (!cartId) {
+            this.createCart()
+        }
+        else {
+            this.setState({ cartId: cartId })
+        }
+    }
+    createCart = async () => {
+        const that = this;
+        const method = {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify({})
+        }
+        fetch(window.restApiUrl + '/cart', method).then(response => response.json())
+            .then((data) => {
+                if (data.status === 'Post success') {
+                    localStorage.setItem('CartId', data.cart.Id)
+                    that.setState({ cartId: data.cart.Id })
+                }
+            })
+            .catch(err => console.log(err))
     }
     retrieveProducts() {
         this.callBackendAPI()
@@ -105,7 +151,7 @@ class Products extends Component {
     }
     render() {
         return <div className="ag-theme-alpine" style={{ height: '50vh', width: '100wv' }} defaultcoldef={{ flex: 1 }}>
-            
+
             <AgGridReact
                 rowData={this.state.rowData}
                 columnDefs={this.state.columnDefs}
@@ -114,8 +160,8 @@ class Products extends Component {
                 suppressRowTransform={true}>
             </AgGridReact>
 
-            <button style={{ position: 'absolute',top: '15px',float: 'right', right: '55px'}} onClick={this.handleOpenModalCreateProduct}>Add new product</button>
-            <button style={{ position: 'absolute',top: '15px',float: 'right', right: '10px'}} onClick={this.handleOpenModalCart}>Cart</button>
+            <button style={{ position: 'absolute', top: '15px', float: 'right', right: '55px' }} onClick={this.handleOpenModalCreateProduct}>Add new product</button>
+            <button style={{ position: 'absolute', top: '15px', float: 'right', right: '10px' }} onClick={this.handleOpenModalCart}>Cart</button>
 
             <ReactModal
                 isOpen={this.state.showModalCreateProduct}

@@ -52,8 +52,7 @@ class Cart extends Component {
             method: 'DELETE',
             headers: {
                 'Content-type': 'application/json; charset=UTF-8'
-            },
-            body: JSON.stringify({})
+            }
         }
         fetch(window.restApiUrl + '/cartItems/' + item.Id, method).then(response => response.json())
             .then((data) => {
