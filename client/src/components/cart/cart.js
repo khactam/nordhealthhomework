@@ -3,14 +3,66 @@ class Cart extends Component {
     constructor(props) {
         super(props);
         this.state = {
-            items: [
-                {
-                    Id: 1,
-                    Name: 'test',
-                    BarCode: 1
-                }
-            ]
+            items: [],
+            cartId: localStorage.getItem('CartId')
         }
+    }
+    componentDidMount() {
+        let cartId = localStorage.getItem('CartId');
+        if (cartId) {
+            this.setState({ cartId: cartId })
+            this.getCartItems()
+                .then(res => this.setState({ items: res }))
+                .catch(err => console.log(err));
+        }
+        else {
+            this.createCart()
+        }
+    }
+    getCartItems = async () => {
+        const response = await fetch(window.restApiUrl + "/cartItems/" + this.state.cartId);
+        const body = await response.json();
+        if (response.status !== 200) {
+            throw Error(body.message)
+        }
+        return body;
+    }
+    createCart = async () => {
+        const that = this;
+        const method = {
+            method: 'POST',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify({})
+        }
+        fetch(window.restApiUrl + '/cart', method).then(response => response.json())
+            .then((data) => {
+                if (data.status === 'Post success') {
+                    localStorage.setItem('CartId', data.cart.Id)
+                    that.setState({ cartId: data.cart.Id })
+                }
+            })
+            .catch(err => console.log(err))
+    }
+    removeItemFromCart = async (item) => {
+        const that = this;
+        let temp = that.state.items
+        const method = {
+            method: 'DELETE',
+            headers: {
+                'Content-type': 'application/json; charset=UTF-8'
+            },
+            body: JSON.stringify({})
+        }
+        fetch(window.restApiUrl + '/cartItems/' + item.Id, method).then(response => response.json())
+            .then((data) => {
+                if (data === 'Deleted successfully') {
+                    temp.splice(temp.indexOf(item), 1)
+                    that.setState({ items: temp })
+                }
+            })
+            .catch(err => console.log(err))
     }
     handleSubmit(event) {
         const productData = {
@@ -33,14 +85,11 @@ class Cart extends Component {
             .catch(err => console.log(err))
         event.preventDefault();
     }
-    removeFromCart(item) {
-        console.log(item)
-    }
     listItems() {
         const items = this.state.items.map((item) =>
             <li key={item.Id}>
-                <button value={item} onClick={() => this.removeFromCart(item)}>X</button>
-                <span>{item.Name} - {item.BarCode}</span>
+                <button value={item} onClick={() => this.removeItemFromCart(item)}>X</button>
+                <span>{item.Product.Name} - {item.Product.BarCode}</span>
             </li>
         )
         return <ul>{items}</ul>
