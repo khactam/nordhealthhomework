@@ -42,7 +42,7 @@ class Product extends Component {
 
         fetch(window.restApiUrl, putMethod).then(response => response.json())
             .then((data) => {
-                this.props.handleCloseModal()
+                this.props.handleAfterUpdateProduct()
             })
             .catch(err => console.log(err))
         event.preventDefault();

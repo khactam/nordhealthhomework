@@ -77,6 +77,9 @@ class Products extends Component {
             },
             rowData: []
         };
+        this.handleAfterUpdateProduct = this.handleAfterUpdateProduct.bind(this)
+        this.retrieveProducts = this.retrieveProducts.bind(this)
+        this.callBackendAPI = this.callBackendAPI.bind(this)
         this.handleOpenModalCart = this.handleOpenModalCart.bind(this)
         this.handleCloseModalCart = this.handleCloseModalCart.bind(this)
         this.handleOpenModalCreateProduct = this.handleOpenModalCreateProduct.bind(this)
@@ -148,6 +151,7 @@ class Products extends Component {
     handleAfterUpdateProduct() {
         this.retrieveProducts();
         this.handleCloseModalModifyProduct();
+        this.handleCloseModalCreateProduct();
     }
     render() {
         return <div className="ag-theme-alpine" style={{ height: '50vh', width: '100wv' }} defaultcoldef={{ flex: 1 }}>
@@ -166,26 +170,23 @@ class Products extends Component {
             <ReactModal
                 isOpen={this.state.showModalCreateProduct}
                 onRequestClose={this.handleCloseModalCreateProduct}
-                ariaHideApp={false}
-            >
-                <Product method="create" handleCloseModal={this.handleCloseModalCreateProduct} />
+                ariaHideApp={false}>
+                <Product handleAfterUpdateProduct={this.handleAfterUpdateProduct} method="create" handleCloseModal={this.handleCloseModalCreateProduct} />
                 <button onClick={this.handleCloseModalCreateProduct}>Close Modal</button>
             </ReactModal>
 
             <ReactModal
                 isOpen={this.state.showModalModifyProduct}
                 onRequestClose={this.handleCloseModalModifyProduct}
-                ariaHideApp={false}
-            >
-                <Product method="update" handleCloseModal={this.handleCloseModalModifyProduct} productData={this.state.productData} />
+                ariaHideApp={false}>
+                <Product handleAfterUpdateProduct={this.handleAfterUpdateProduct} method="update" handleCloseModal={this.handleCloseModalModifyProduct} productData={this.state.productData} />
                 <button onClick={this.handleCloseModalModifyProduct}>Close Modal</button>
             </ReactModal>
 
             <ReactModal
                 isOpen={this.state.showModalCart}
                 onRequestClose={this.handleCloseModalCart}
-                ariaHideApp={false}
-            >
+                ariaHideApp={false}>
                 <Cart />
                 <button onClick={this.handleCloseModalCart}>Close cart</button>
             </ReactModal>
